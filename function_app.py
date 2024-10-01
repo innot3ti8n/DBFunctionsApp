@@ -18,9 +18,10 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
 # GET: Get Criteria list for a skill
 '''
+
     Route: '/criteria/{skillId:int?}'
     Route Params: {
-        skillId: Int
+        skillId: Int. Values are 1: Punctuation, 2: Vocabulary, 3: Cohesion, 4: Sentente Type & Structure, 5: Developing & Elaborating Ideas
     }
 '''
 @app.route(route="criteria/{skillId:int?}", methods=["GET"])
@@ -57,6 +58,7 @@ def criteria(req: func.HttpRequest) -> func.HttpResponse:
 
 # GET: Get Text Component for a Specific Skill
 '''
+    Param: skillId (1: Punctuation, 2: Vocabulary, 3: Cohesion, 4: Sentente Type & Structure, 5: Developing & Elaborating Ideas)
     Route: text_component/{skillId:int?}
 '''
 @app.route(route="text_component/{skillId:int?}", methods=["GET"])
