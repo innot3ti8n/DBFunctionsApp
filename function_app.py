@@ -16,6 +16,13 @@ dbConfig = {
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
+# GET: Get Criteria list for a skill
+'''
+    Route: '/criteria/{skillId:int?}'
+    Route Params: {
+        skillId: Int
+    }
+'''
 @app.route(route="criteria/{skillId:int?}", methods=["GET"])
 def criteria(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
@@ -48,7 +55,10 @@ def criteria(req: func.HttpRequest) -> func.HttpResponse:
     finally:
         conn.close()
 
-
+# GET: Get Text Component for a Specific Skill
+'''
+    Route: text_component/{skillId:int?}
+'''
 @app.route(route="text_component/{skillId:int?}", methods=["GET"])
 def textComponent(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
@@ -81,8 +91,17 @@ def textComponent(req: func.HttpRequest) -> func.HttpResponse:
     finally:
         conn.close()
 
-@app.route(route="text_sample", methods=["POST"])
-def sendTextSample(req: func.HttpRequest) -> func.HttpResponse:
+# POST: Send new Annotation Text Sample to DB 
+# Request Body
+'''
+{
+    "text": String,
+    "annotationType": Number,
+    "sampleId": Number,
+}
+'''
+@app.route(route="text_sample_annotation", methods=["POST"])
+def sendTextSampleAnnotation(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
     body = req.get_json()
@@ -113,16 +132,20 @@ def sendTextSample(req: func.HttpRequest) -> func.HttpResponse:
 
     try:
         cursor.execute(query)
-        result = cursor.fetchall()
-        if result:
-            return func.HttpResponse(json.dumps(result), status_code=200)
-        else:
-            return func.HttpResponse(None, status_code=200)
+        conn.commit()
+        cursor.execute(' SELECT LAST_INSERT_ID();')
+        result = cursor.fetchone()
+        return func.HttpResponse(json.dumps(result), status_code=200)
     finally:
         conn.close()
 
-@app.route(route="text_sample/{text_sample_annotation_id:int?}", methods=["GET"])
-def getTextSample(req: func.HttpRequest) -> func.HttpResponse:
+# GET: Get Annotation Text Sample
+'''
+route: '/text_sample_annotation/{text_sample_annotation_id:int?}'
+Param: text_sample_annotation_id: Int
+'''
+@app.route(route="text_sample_annotation/{text_sample_annotation_id:int?}", methods=["GET"])
+def getTextSampleAnnotation(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
     id = req.route_params.get('text_sample_annotation_id')
@@ -150,5 +173,51 @@ def getTextSample(req: func.HttpRequest) -> func.HttpResponse:
             return func.HttpResponse(json.dumps(result), status_code=200)
         else:
             return func.HttpResponse(None, status_code=200)
+    finally:
+        conn.close()
+
+
+# POST: Text Sample Create New (student_name)
+# Route: '/text_sample'
+# Request Body
+'''
+{
+    "student_name": String,
+}
+'''
+@app.route(route="text_sample", methods=["POST"])
+def sendTextSample(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('Python HTTP trigger function processed a request.')
+
+    body = req.get_json()
+
+    try:
+            body = req.get_json()
+            studentName = body["student_name"]
+    except ValueError:
+            print(f"Invalid Request body, {ValueError}")
+
+    try:
+        conn = mysql.connector.connect(**dbConfig)
+        logging.info("Connection Established")
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Something is wrong with the username or password")
+        elif err.errno == errorcode.ER_BAD_DB_ERROR:
+            print("Database does not exist")
+        else:
+            print(err)
+            print(**dbConfig)
+    else:
+        cursor = conn.cursor(dictionary=True)
+
+    query = f"Insert into text_sample (student_name) VALUES ('{studentName}');"
+
+    try:
+        cursor.execute(query, multi=True)
+        conn.commit()
+        cursor.execute('SELECT LAST_INSERT_ID();')
+        result = cursor.fetchone()
+        return func.HttpResponse(json.dumps(result), status_code=200)
     finally:
         conn.close()
