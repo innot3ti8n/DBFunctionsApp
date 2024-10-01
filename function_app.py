@@ -88,10 +88,10 @@ def sendTextSample(req: func.HttpRequest) -> func.HttpResponse:
     body = req.get_json()
 
     try:
-            req_body = req.get_json()
-            textSampleContent = req_body["text"]
-            annotatationType = req_body["annotationType"]
-            textSampleId = req_body["sampleId"]
+            body = req.get_json()
+            textSampleContent = body["text"]
+            annotatationType = body["annotationType"]
+            textSampleId = body["sampleId"]
     except ValueError:
             print(f"Invalid Request body, {ValueError}")
 
