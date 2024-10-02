@@ -113,6 +113,7 @@ def sendTextSampleAnnotation(req: func.HttpRequest) -> func.HttpResponse:
             textSampleContent = body["text"]
             annotatationType = body["annotationType"]
             textSampleId = body["sampleId"]
+            skillLevelId = body["skillLevelId"] if "skillLevelId" in body.keys() else 0
     except ValueError:
             print(f"Invalid Request body, {ValueError}")
 
@@ -135,8 +136,13 @@ def sendTextSampleAnnotation(req: func.HttpRequest) -> func.HttpResponse:
     try:
         cursor.execute(query)
         conn.commit()
-        cursor.execute(' SELECT LAST_INSERT_ID();')
-        result = cursor.fetchone()
+        result = cursor.lastrowid
+        
+        if(skillLevelId != 0):
+            query = f"Insert into results SET text_sample_annotation_id={result}, skill_level_id={skillLevelId}"
+            cursor.execute(query)
+            conn.commit()
+
         return func.HttpResponse(json.dumps(result), status_code=200)
     finally:
         conn.close()
@@ -218,8 +224,7 @@ def sendTextSample(req: func.HttpRequest) -> func.HttpResponse:
     try:
         cursor.execute(query, multi=True)
         conn.commit()
-        cursor.execute('SELECT LAST_INSERT_ID();')
-        result = cursor.fetchone()
+        result = cursor.lastrowid
         return func.HttpResponse(json.dumps(result), status_code=200)
     finally:
         conn.close()
