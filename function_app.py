@@ -109,13 +109,13 @@ def sendTextSampleAnnotation(req: func.HttpRequest) -> func.HttpResponse:
     body = req.get_json()
 
     try:
-            body = req.get_json()
-            textSampleContent = body["text"]
-            annotatationType = body["annotationType"]
-            textSampleId = body["sampleId"]
-            skillLevelId = body["skillLevelId"] if "skillLevelId" in body.keys() else 0
+        body = req.get_json()
+        textSampleContent = body["text"]
+        annotatationType = body["annotationType"]
+        textSampleId = body["sampleId"]
+        skillLevelId = body["skillLevelId"] if "skillLevelId" in body.keys() else 0
     except ValueError:
-            print(f"Invalid Request body, {ValueError}")
+        print(f"Invalid Request body, {ValueError}")
 
     try:
         conn = mysql.connector.connect(**dbConfig)
