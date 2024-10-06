@@ -228,3 +228,31 @@ def sendTextSample(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(json.dumps(result), status_code=200)
     finally:
         conn.close()
+
+@app.route(route="skills", methods=["GET"])
+def getSkills(req: func.HttpRequest) -> func.HttpResponse:
+    try:
+        conn = mysql.connector.connect(**dbConfig)
+        logging.info("Connection Established")
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Something is wrong with the username or password")
+        elif err.errno == errorcode.ER_BAD_DB_ERROR:
+            print("Database does not exist")
+        else:
+            print(err)
+            print(**dbConfig)
+    else:
+        cursor = conn.cursor(dictionary=True)
+
+    query = f"SELECT * FROM `skill`;"
+
+    try:
+        cursor.execute(query)
+        result = cursor.fetchall()
+        if result:
+            return func.HttpResponse(json.dumps(result), status_code=200)
+        else:
+            return func.HttpResponse(None, status_code=200)
+    finally:
+        conn.close()
