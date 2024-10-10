@@ -44,7 +44,7 @@ def criteria(req: func.HttpRequest) -> func.HttpResponse:
     else:
         cursor = conn.cursor(dictionary=True)
 
-    query = f"select C.criteria_id, C.skill_level_id, S.level_id, C.criteria from Criteria as C inner join skill_level as S ON C.skill_level_id = S.skill_level_id WHERE skill_id = {id};"
+    query = f"select C.criteria_id, S.skill_level_id, S.level_id, C.criteria from Criteria as C RIGHT join skill_level as S ON C.skill_level_id = S.skill_level_id WHERE skill_id = {id};"
 
     try:
         cursor.execute(query)
