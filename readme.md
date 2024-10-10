@@ -2,13 +2,13 @@
 
 ### Run Local
 1. Install Azure Core Tools using the link: https://github.com/Azure/azure-functions-core-tools
-2. Install Python: https://www.python.org/downloads
+2. Install Python version 3.11 here: https://www.python.org/downloads
 
 3. Put local.settings.json and certificate to database to your root directory
 4. Open the directory terminal
 5. Create the virtual environment (.venv) and install dependencies using commands
    ```
-   py -3.9 python -m venv .venv
+   py -3.11 python -m venv .venv
    .venv/Scripts/activate
    pip install -r requirements.txt
    ```
