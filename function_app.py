@@ -36,11 +36,14 @@ def criteria(req: func.HttpRequest) -> func.HttpResponse:
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             print("Something is wrong with the username or password")
+            return func.HttpResponse(body="Database Error", status_code=500)
         elif err.errno == errorcode.ER_BAD_DB_ERROR:
             print("Database does not exist")
+            return func.HttpResponse(body="Database Error", status_code=500)
         else:
             print(err)
             print(**dbConfig)
+            return func.HttpResponse(body=str(err), status_code=500)
     else:
         cursor = conn.cursor(dictionary=True)
 
@@ -110,12 +113,17 @@ def sendTextSampleAnnotation(req: func.HttpRequest) -> func.HttpResponse:
 
     try:
         body = req.get_json()
-        textSampleContent = body["text"]
-        annotatationType = body["annotationType"]
-        textSampleId = body["sampleId"]
+        textSampleContent = body["text"] if body["text"] else None
+        annotatationType = body["annotationType"] if body["annotationType"] else None
+        textSampleId = body["sampleId"] if body["sampleId"] else None
         skillLevelId = body["skillLevelId"] if "skillLevelId" in body.keys() else 0
+
+        if textSampleId == None or skillLevelId == None or textSampleContent == None or annotatationType == None:
+            return func.HttpResponse(body="Bad Request", status_code=400)
+        
     except ValueError:
         print(f"Invalid Request body, {ValueError}")
+        return func.HttpResponse(body=f"Invalid Request body, {ValueError}", status_code=400)
 
     try:
         conn = mysql.connector.connect(**dbConfig)
@@ -123,11 +131,14 @@ def sendTextSampleAnnotation(req: func.HttpRequest) -> func.HttpResponse:
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             print("Something is wrong with the username or password")
+            return func.HttpResponse(body="Database Error", status_code=500)
         elif err.errno == errorcode.ER_BAD_DB_ERROR:
             print("Database does not exist")
+            return func.HttpResponse(body="Database Error", status_code=500)
         else:
             print(err)
             print(**dbConfig)
+            return func.HttpResponse(body=str(err), status_code=500)
     else:
         cursor = conn.cursor(dictionary=True)
 
@@ -164,11 +175,14 @@ def getTextSampleAnnotation(req: func.HttpRequest) -> func.HttpResponse:
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             print("Something is wrong with the username or password")
+            return func.HttpResponse(body="Something is wrong with the database", status_code=500)
         elif err.errno == errorcode.ER_BAD_DB_ERROR:
             print("Database does not exist")
+            return func.HttpResponse(body="Database Error", status_code=500)
         else:
             print(err)
             print(**dbConfig)
+            return func.HttpResponse(body=str(err), status_code=500)
     else:
         cursor = conn.cursor(dictionary=True)
 
@@ -197,13 +211,15 @@ def getTextSampleAnnotation(req: func.HttpRequest) -> func.HttpResponse:
 def sendTextSample(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
-    body = req.get_json()
-
     try:
-            body = req.get_json()
-            studentName = body["student_name"]
+        body = req.get_json()
+        studentName = body["student_name"] if body["student_name"] else None
+
+        if studentName == None:
+            return func.HttpResponse(body="Bad Request", status_code=400)
     except ValueError:
-            print(f"Invalid Request body, {ValueError}")
+        print(f"Invalid Request body, {ValueError}")
+        return func.HttpResponse(body=f"Invalid Request body, {ValueError}", status_code=400)
 
     try:
         conn = mysql.connector.connect(**dbConfig)
@@ -211,11 +227,14 @@ def sendTextSample(req: func.HttpRequest) -> func.HttpResponse:
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             print("Something is wrong with the username or password")
+            return func.HttpResponse(body="Database Error", status_code=500)
         elif err.errno == errorcode.ER_BAD_DB_ERROR:
             print("Database does not exist")
+            return func.HttpResponse(body="Database Error", status_code=500)
         else:
             print(err)
             print(**dbConfig)
+            return func.HttpResponse(body=str(err), status_code=500)
     else:
         cursor = conn.cursor(dictionary=True)
 
@@ -237,11 +256,14 @@ def getSkills(req: func.HttpRequest) -> func.HttpResponse:
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             print("Something is wrong with the username or password")
+            return func.HttpResponse(body="Database Error", status_code=500)
         elif err.errno == errorcode.ER_BAD_DB_ERROR:
             print("Database does not exist")
+            return func.HttpResponse(body="Database Error", status_code=500)
         else:
             print(err)
             print(**dbConfig)
+            return func.HttpResponse(body=str(err), status_code=500)
     else:
         cursor = conn.cursor(dictionary=True)
 
