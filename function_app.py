@@ -219,7 +219,7 @@ def sendTextSample(req: func.HttpRequest) -> func.HttpResponse:
     else:
         cursor = conn.cursor(dictionary=True)
 
-    query = f"Insert into text_sample (student_name) VALUES ('{studentName}');"
+    query = f"Insert into text_sample (text_sample_name) VALUES ('{studentName}');"
 
     try:
         cursor.execute(query, multi=True)
