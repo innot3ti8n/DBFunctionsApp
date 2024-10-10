@@ -52,7 +52,7 @@ def criteria(req: func.HttpRequest) -> func.HttpResponse:
         if result:
             return func.HttpResponse(json.dumps(result), status_code=200)
         else:
-            return func.HttpResponse(None, status_code=200)
+            return func.HttpResponse(None, status_code=204)
     finally:
         conn.close()
 
@@ -89,7 +89,7 @@ def textComponent(req: func.HttpRequest) -> func.HttpResponse:
         if result:
             return func.HttpResponse(json.dumps(result), status_code=200)
         else:
-            return func.HttpResponse(None, status_code=200)
+            return func.HttpResponse(None, status_code=204)
     finally:
         conn.close()
 
@@ -180,7 +180,7 @@ def getTextSampleAnnotation(req: func.HttpRequest) -> func.HttpResponse:
         if result:
             return func.HttpResponse(json.dumps(result), status_code=200)
         else:
-            return func.HttpResponse(None, status_code=200)
+            return func.HttpResponse(None, status_code=204)
     finally:
         conn.close()
 
@@ -253,6 +253,6 @@ def getSkills(req: func.HttpRequest) -> func.HttpResponse:
         if result:
             return func.HttpResponse(json.dumps(result), status_code=200)
         else:
-            return func.HttpResponse(None, status_code=200)
+            return func.HttpResponse(None, status_code=204)
     finally:
         conn.close()
