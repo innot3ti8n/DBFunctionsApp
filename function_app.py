@@ -90,7 +90,7 @@ def textComponent(req: func.HttpRequest) -> func.HttpResponse:
         cursor.execute(query)
         result = cursor.fetchall()
 
-        res = [{'textComponentId': row['text_component_id'], 'name': row['name'], 'example': row['example'], 'flag': {'flagId': row['flag_id'], 'name': row['name'], 'colour': row['colour'], 'characters': row['characters']}} for row in result]
+        res = [{'textComponentId': row['text_component_id'], 'name': row['name'], 'example': row['example'], 'markupId': row['markup_id'], 'flag': {'flagId': row['flag_id'], 'name': row['name'], 'colour': row['colour'], 'characters': row['characters']}} for row in result]
 
         if result:
             return func.HttpResponse(json.dumps(res), status_code=200)
