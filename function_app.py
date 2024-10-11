@@ -84,13 +84,16 @@ def textComponent(req: func.HttpRequest) -> func.HttpResponse:
     else:
         cursor = conn.cursor(dictionary=True)
 
-    query = f"select * from text_component WHERE skill_id={id};"
+    query = f"select c.text_component_id, c.name, c.example, cf.flag_id, c.markup_id, f.name, f.colour, f.characters, f.flag_id, f.colour, f.characters from text_component as c RIGHT JOIN text_component_flag as cf ON c.text_component_id = cf.text_component_id RIGHT JOIN flag as f ON cf.flag_id = f.flag_id WHERE skill_id={id};"
 
     try:
         cursor.execute(query)
         result = cursor.fetchall()
+
+        res = [{'textComponentId': row['text_component_id'], 'name': row['name'], 'example': row['example'], 'flag': {'flagId': row['flag_id'], 'name': row['name'], 'colour': row['colour'], 'characters': row['characters']}} for row in result]
+
         if result:
-            return func.HttpResponse(json.dumps(result), status_code=200)
+            return func.HttpResponse(json.dumps(res), status_code=200)
         else:
             return func.HttpResponse(None, status_code=204)
     finally:
