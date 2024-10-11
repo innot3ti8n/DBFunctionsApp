@@ -16,5 +16,6 @@
 8. Run the command `func start`
 
 You can edit the function using Visual Studio Code.
-For GET Request, you can use your browser
+
+For GET Request, you can use your browser.
 For POST Request, please kindly use Postman
