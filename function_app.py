@@ -317,6 +317,9 @@ def getFlags(req: func.HttpRequest) -> func.HttpResponse:
 
 @app.route(route="flags/{skillId:int?}", methods=["GET"])
 def getFlagsForTextComponents(req: func.HttpRequest) -> func.HttpResponse:
+
+    skillId = req.route_params.get('skillId')
+
     try:
         conn = mysql.connector.connect(**dbConfig)
         logging.info("Connection Established")
@@ -334,7 +337,7 @@ def getFlagsForTextComponents(req: func.HttpRequest) -> func.HttpResponse:
     else:
         cursor = conn.cursor(dictionary=True)
 
-    query = f"select c.text_component_id, cf.flag_id, c.markup_id from text_component as c INNER JOIN text_component_flag as cf ON c.text_component_id = cf.text_component_id WHERE skill_id=1;" # What should be the query here?
+    query = f"select c.text_component_id, cf.flag_id, c.markup_id from text_component as c INNER JOIN text_component_flag as cf ON c.text_component_id = cf.text_component_id WHERE skill_id={skillId};" # What should be the query here?
 
     try:
         cursor.execute(query)
