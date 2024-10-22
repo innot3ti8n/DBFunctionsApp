@@ -4,6 +4,8 @@ import mysql.connector
 import os
 from mysql.connector import errorcode
 import json
+from mysql.connector.errors import Error
+
 
 dbConfig = {
     'host': os.environ['DB_HOST'],
@@ -113,12 +115,12 @@ def sendTextSampleAnnotation(req: func.HttpRequest) -> func.HttpResponse:
 
     try:
         body = req.get_json()
-        textSampleContent = body["text"] if body["text"] else None
-        annotatationType = body["annotationType"] if body["annotationType"] else None
-        textSampleId = body["sampleId"] if body["sampleId"] else None
-        skillLevelId = body["skillLevelId"] if "skillLevelId" in body.keys() else 0
+        textSampleContent = body["text"] if "text" in body.keys() else None
+        annotatationType = body["annotationType"] if "annotationType" in body.keys() else None
+        textSampleId = body["sampleId"] if "sampleId" in body.keys() and int(body["sampleId"]) != 0 else None
+        skillLevelId = body["skillLevelId"] if "skillLevelId" in body.keys() else None
 
-        if textSampleId == None or skillLevelId == None or textSampleContent == None or annotatationType == None:
+        if textSampleId == None or textSampleContent == None or annotatationType == None:
             return func.HttpResponse(body="Bad Request", status_code=400)
         
     except ValueError:
@@ -149,7 +151,7 @@ def sendTextSampleAnnotation(req: func.HttpRequest) -> func.HttpResponse:
         conn.commit()
         result = cursor.lastrowid
         
-        if(skillLevelId != 0):
+        if(skillLevelId):
             query = f"Insert into results SET text_sample_annotation_id={result}, skill_level_id={skillLevelId}"
             cursor.execute(query)
             conn.commit()
@@ -213,7 +215,7 @@ def sendTextSample(req: func.HttpRequest) -> func.HttpResponse:
 
     try:
         body = req.get_json()
-        studentName = body["student_name"] if body["student_name"] else None
+        studentName = body["student_name"] if "student_name" in body.keys() else "John Scriibiseed"
 
         if studentName == None:
             return func.HttpResponse(body="Bad Request", status_code=400)
@@ -276,5 +278,39 @@ def getSkills(req: func.HttpRequest) -> func.HttpResponse:
             return func.HttpResponse(json.dumps(result), status_code=200)
         else:
             return func.HttpResponse(None, status_code=204)
+    finally:
+        conn.close()
+
+@app.route(route="flags", methods=["GET"])
+def getFlags(req: func.HttpRequest) -> func.HttpResponse:
+    try:
+        conn = mysql.connector.connect(**dbConfig)
+        logging.info("Connection Established")
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Something is wrong with the username or password")
+            return func.HttpResponse(body="Database Error", status_code=500)
+        elif err.errno == errorcode.ER_BAD_DB_ERROR:
+            print("Database does not exist")
+            return func.HttpResponse(body="Database Error", status_code=500)
+        else:
+            print(err)
+            print(**dbConfig)
+            return func.HttpResponse(body=str(err), status_code=500)
+    else:
+        cursor = conn.cursor(dictionary=True)
+
+    query = f"select * from `flag`;"
+
+    try:
+        cursor.execute(query)
+        result = cursor.fetchall()
+        if result:
+            return func.HttpResponse(json.dumps(result), status_code=200)
+        else:
+            return func.HttpResponse(None, status_code=204)
+    except mysql.connector.Error as e:
+        print("Something went wrong: {}".format(err))
+        return None
     finally:
         conn.close()
