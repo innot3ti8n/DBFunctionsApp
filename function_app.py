@@ -314,3 +314,37 @@ def getFlags(req: func.HttpRequest) -> func.HttpResponse:
         return None
     finally:
         conn.close()
+
+@app.route(route="flags/{skillId:int?}", methods=["GET"])
+def getFlagsForTextComponents(req: func.HttpRequest) -> func.HttpResponse:
+    try:
+        conn = mysql.connector.connect(**dbConfig)
+        logging.info("Connection Established")
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Something is wrong with the username or password")
+            return func.HttpResponse(body="Database Error", status_code=500)
+        elif err.errno == errorcode.ER_BAD_DB_ERROR:
+            print("Database does not exist")
+            return func.HttpResponse(body="Database Error", status_code=500)
+        else:
+            print(err)
+            print(**dbConfig)
+            return func.HttpResponse(body=str(err), status_code=500)
+    else:
+        cursor = conn.cursor(dictionary=True)
+
+    query = f"select c.text_component_id, cf.flag_id, c.markup_id from text_component as c INNER JOIN text_component_flag as cf ON c.text_component_id = cf.text_component_id WHERE skill_id=1;" # What should be the query here?
+
+    try:
+        cursor.execute(query)
+        result = cursor.fetchall()
+        if result:
+            return func.HttpResponse(json.dumps(result), status_code=200)
+        else:
+            return func.HttpResponse(None, status_code=204)
+    except mysql.connector.Error as e:
+        print("Something went wrong: {}".format(err))
+        return None
+    finally:
+        conn.close()
