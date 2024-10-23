@@ -144,10 +144,10 @@ def sendTextSampleAnnotation(req: func.HttpRequest) -> func.HttpResponse:
     else:
         cursor = conn.cursor(dictionary=True)
 
-    query = f"Insert into text_sample_annotation SET text_sample_id={textSampleId}, annotation_type_id={annotatationType}, text='{textSampleContent}';"
+    query = f"Insert into text_sample_annotation SET text_sample_id=%(textSampleId)s, annotation_type_id=%(annotatationType)s, text=%(text)s;"
 
     try:
-        cursor.execute(query)
+        cursor.execute(query, {"textSampleId": textSampleId, "annotatationType": annotatationType, "text": textSampleContent})
         conn.commit()
         result = cursor.lastrowid
         
@@ -240,10 +240,10 @@ def sendTextSample(req: func.HttpRequest) -> func.HttpResponse:
     else:
         cursor = conn.cursor(dictionary=True)
 
-    query = f"Insert into text_sample (text_sample_name) VALUES ('{studentName}');"
+    query = f"Insert into text_sample (text_sample_name) VALUES (%(student_name)s);"
 
     try:
-        cursor.execute(query, multi=True)
+        cursor.execute(query, {"student_name": studentName})
         conn.commit()
         result = cursor.lastrowid
         return func.HttpResponse(json.dumps(result), status_code=200)
