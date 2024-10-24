@@ -365,7 +365,7 @@ def getFlagsForTextComponents(req: func.HttpRequest) -> func.HttpResponse:
                     
                     textComponent["flags"] = flagArray
 
-                return func.HttpResponse(json.dumps({"textComponent": textComponents}), status_code=200)
+                return func.HttpResponse(json.dumps({"flags": flags, "textComponent": textComponents}), status_code=200)
             else:
                 return func.HttpResponse(None, status_code=204)
 
