@@ -359,16 +359,15 @@ def getFlagsForTextComponents(req: func.HttpRequest) -> func.HttpResponse:
             textComponents = cursor.fetchall()
 
             if textComponents:
-                flagArray = []
-                
                 for textComponent in textComponents:
+                    flagArray = []
                     for flag in flags:
-                        if int(flag["text_component_id"]) == int(textComponent["text_component_id"]):
-                            flagArray.append(flags) # flag is being add twice
+                        if flag["text_component_id"] == textComponent["text_component_id"]:
+                            flagArray.append(flag)
                     
                     textComponent["flags"] = flagArray
 
-                return func.HttpResponse(json.dumps({"flags": flags, "textComponent": textComponents}), status_code=200)
+                return func.HttpResponse(json.dumps({"textComponent": textComponents}), status_code=200)
             else:
                 return func.HttpResponse(None, status_code=204)
 
