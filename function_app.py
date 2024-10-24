@@ -337,17 +337,38 @@ def getFlagsForTextComponents(req: func.HttpRequest) -> func.HttpResponse:
     else:
         cursor = conn.cursor(dictionary=True)
 
-    query = f"select c.text_component_id, cf.flag_id, c.markup_id from text_component as c INNER JOIN text_component_flag as cf ON c.text_component_id = cf.text_component_id WHERE skill_id={skillId};" # What should be the query here?
+    query = f"select c.text_component_id, cf.flag_id, c.markup_id from text_component as c INNER JOIN text_component_flag as cf ON c.text_component_id = cf.text_component_id WHERE skill_id=%(skillId)s;"
 
     try:
-        cursor.execute(query)
-        result = cursor.fetchall()
-        if result:
-            return func.HttpResponse(json.dumps(result), status_code=200)
+        cursor.execute(query, {"skillId": skillId})
+        flags = cursor.fetchall()
+        if flags:
+            cursor.close()
         else:
-            return func.HttpResponse(None, status_code=204)
+            return func.HttpResponse(json.dumps({"msg": "Flags database error"}), status_code=500)
     except mysql.connector.Error as e:
         print("Something went wrong: {}".format(err))
         return None
-    finally:
-        conn.close()
+    else:
+        try:
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute(f"select * from text_component WHERE skill_id={skillId};")
+            textComponents = cursor.fetchall()
+
+            if textComponents:
+                flagArray = []
+                
+                for textComponent in textComponents:
+                    for flag in flags:
+                        if int(flag["text_component_id"]) == int(textComponent["text_component_id"]):
+                            flagArray.append(flags) # flag is being add twice
+                    
+                    textComponent["flags"] = flagArray
+
+                return func.HttpResponse(json.dumps({"textComponent": textComponents}), status_code=200)
+            else:
+                return func.HttpResponse(None, status_code=204)
+
+        except mysql.connector.Error as e:
+            print("Something went wrong: {}".format(err))
+            return None
